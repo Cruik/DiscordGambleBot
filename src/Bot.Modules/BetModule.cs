@@ -278,7 +278,7 @@ namespace Bot.Modules
 
                     if(gambleId > 0)
                     {
-                        await GetLeaderboard();
+                        await GetLeaderboard(); 
                     }
                 }
                 else
