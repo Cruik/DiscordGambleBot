@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="2.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bot.Modules\Bot.Modules.csproj" />
+    <ProjectReference Include="..\DotA2.Gambling.Context\DotA2.Gambling.Context.csproj" />
+    <ProjectReference Include="..\DotA2.Gambling.Model\DotA2.Gambling.Model.csproj" />
+  </ItemGroup>
+
+</Project>

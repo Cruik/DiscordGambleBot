@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Discord.Net.Commands" Version="2.4.0" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="2.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DotA2.Gambling.Model\DotA2.Gambling.Model.csproj" />
+  </ItemGroup>
+
+</Project>
