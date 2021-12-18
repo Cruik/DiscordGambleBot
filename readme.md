@@ -21,7 +21,7 @@ Security
 
 Best-README-Template/BLANK_README.md
 @othneildrew
-othneildrew Update: add changelog; fixed typos; add roadmap checklist; add back t…
+othneildrew Update: add changelog; fixed typos; add roadmap checklist; add back tâ€¦
 Latest commit d9406e6 on 2 Oct
 History
 9 contributors
@@ -75,13 +75,13 @@ History
   <p align="center">
     project_description
     <br />
-    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs Â»</strong></a>
     <br />
     <br />
     <a href="https://github.com/github_username/repo_name">View Demo</a>
-    ·
+    Â·
     <a href="https://github.com/github_username/repo_name/issues">Report Bug</a>
-    ·
+    Â·
     <a href="https://github.com/github_username/repo_name/issues">Request Feature</a>
   </p>
 </div>
@@ -252,21 +252,21 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
-[contributors-url]: https://github.com/github_username/repo_name/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
-[forks-url]: https://github.com/github_username/repo_name/network/members
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
-[stars-url]: https://github.com/github_username/repo_name/stargazers
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
-[issues-url]: https://github.com/github_username/repo_name/issues
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
-[license-url]: https://github.com/github_username/repo_name/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/Cruik/DiscordGambleBot.svg?style=for-the-badge
+[contributors-url]: https://github.com/Cruik/DiscordGambleBot/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/Cruik/DiscordGambleBot.svg?style=for-the-badge
+[forks-url]: https://github.com/Cruik/DiscordGambleBot/network/members
+[stars-shield]: https://img.shields.io/github/stars/Cruik/DiscordGambleBot.svg?style=for-the-badge
+[stars-url]: https://github.com/Cruik/DiscordGambleBot/stargazers
+[issues-shield]: https://img.shields.io/github/issues/Cruik/DiscordGambleBot.svg?style=for-the-badge
+[issues-url]: https://github.com/Cruik/DiscordGambleBot/issues
+[license-shield]: https://img.shields.io/github/license/Cruik/DiscordGambleBot.svg?style=for-the-badge
+[license-url]: https://github.com/Cruik/DiscordGambleBot/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/linkedin_username
 [product-screenshot]: images/screenshot.png
 
-    © 2021 GitHub, Inc.
+    Â© 2021 GitHub, Inc.
 
     Terms
     Privacy
