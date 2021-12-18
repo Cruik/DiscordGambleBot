@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Bot.Model;
 using Bot.Services;
@@ -19,18 +20,21 @@ namespace DotA2GambleBot
 
         public Startup(string[] args)
         {
-            var devEnvironmentVariable = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            
+            var isDevelopment = string.IsNullOrEmpty(environment) ||
+                                environment.ToLower() == "development";
 
-            var isDevelopment = string.IsNullOrEmpty(devEnvironmentVariable) ||
-                                devEnvironmentVariable.ToLower() == "development";
 
             var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json");
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.docker.json", optional: true)
+                .AddEnvironmentVariables();
 
             //only add secrets in development
             if(isDevelopment)
             {
-                builder.AddUserSecrets<Program>();
+                builder.AddUserSecrets<Program>(true);
             }
 
             Configuration = builder.Build();
@@ -59,9 +63,14 @@ namespace DotA2GambleBot
             var botConfigSection = Configuration.GetSection("BotConfiguration");
             BotConfiguration botConfiguration = botConfigSection.Get<BotConfiguration>();
 
-            services.AddSingleton<BotConfiguration>(botConfiguration);
-                      
+            var botSecretSection = Configuration.GetSection("BotSecrets");
+            BotSecrets botSecrets = botSecretSection.Get<BotSecrets>();
 
+            botConfiguration.DefaultConnection = botSecrets.ConnectionString;
+            botConfiguration.Token = botSecrets.DiscordBotToken;
+
+            services.AddSingleton<BotConfiguration>(botConfiguration);
+            
             services.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
             {                                       // Add discord to the collection
                 LogLevel = LogSeverity.Verbose,     // Tell the logger to give Verbose amount of info

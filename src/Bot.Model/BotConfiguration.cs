@@ -7,4 +7,6 @@
         public string GambleCommand { get; set; }
         public string DefaultConnection { get; set; }
     }
+
+
 }

@@ -6,6 +6,8 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Bot.Model;
 using Bot.Modules;
+using DapperExtensions;
+using Microsoft.Extensions.Configuration;
 
 namespace Bot.Services
 {
