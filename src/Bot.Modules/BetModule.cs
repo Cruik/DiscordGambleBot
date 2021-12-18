@@ -122,19 +122,31 @@ namespace Bot.Modules
 
         private async Task SetBet(IUser user, Prediction prediction, int token)
         {
-
-            //var msg = Context.Channel;
-            //var better = Context.User;
             var caller = Context.User;
-            var betId = _gambler.Bet(user.Username, caller.Username, prediction, token);
 
-            if(betId > 0)
+            var callerAccount = _dataService.GetAccount(caller.Username);
+            if(callerAccount != null)
             {
-                await ReplyAsync("Bet accepted!");
-            }
-            else
-            {
-                await ReplyAsync("Too late to apologize! No Bets possible!");
+                var canPlaceBet = callerAccount.Balance - token >= 0;
+
+                if(canPlaceBet)
+                {
+                    var betId = _gambler.Bet(user.Username, caller.Username, prediction, token);
+
+                    if(betId > 0)
+                    {
+                        await ReplyAsync("Bet accepted!");
+                    }
+                    else
+                    {
+                        await ReplyAsync("Too late to apologize! No Bets possible!");
+                    }
+                }
+                else
+                {
+                    await ReplyAsync($"{user.Username} you have not enough to place this bet!");
+                    await ReplyAsync("https://tenor.com/view/patrick-poor-ugly-thing-spongbob-gif-13658543");
+                }
             }
         }
 
@@ -278,7 +290,7 @@ namespace Bot.Modules
 
                     if(gambleId > 0)
                     {
-                        await GetLeaderboard(); 
+                        await GetLeaderboard();
                     }
                 }
                 else
@@ -324,7 +336,7 @@ namespace Bot.Modules
             var caller = Context.User;
             bool isRegistered = IsUserRegistered(caller).GetAwaiter().GetResult();
             var prefix = _config.Prefix;
-            
+
             if(isRegistered)
             {
                 var builder = new EmbedBuilder()
@@ -342,19 +354,19 @@ namespace Bot.Modules
                     {
                         string command = null;
                         var result = await cmd.CheckPreconditionsAsync(Context);
-                        
+
                         if(result.IsSuccess)
                         {
                             var parameters = cmd.Parameters;
                             string parameterString = string.Empty;
 
-                            if (parameters != null)
+                            if(parameters != null)
                             {
                                 parameterString = string.Join(" ", parameters.Select(x => x.Name).ToList());
                             }
                             command += $"{prefix}{cmd.Aliases.First()} {parameterString}\n";
                         }
-                        
+
                         if(!string.IsNullOrWhiteSpace(command))
                         {
                             builder.AddField(x =>

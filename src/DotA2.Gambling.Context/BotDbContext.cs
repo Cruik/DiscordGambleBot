@@ -286,11 +286,11 @@ OUTPUT INSERTED.Id VALUES(@Name,@BetTime,@Odds,@Result,@IsOpen,@MatchId, @IsGame
                 id = connection.Query<int>(sql, paramList).FirstOrDefault();
             }
 
-            if (id > 0)
+            if(id > 0)
             {
                 CalculateGambleResult(id);
             }
-            
+
             return id;
         }
 
@@ -308,23 +308,28 @@ where b.GambleId = @Id and b.Prediction = g.Result";
             string updateBalanceSql = @"UPDATE [dbo].[Accounts]
    SET [Balance] = Balance + @Win
  WHERE Id = @AccountId";
+
+            string archiveBetSql = @"UPDATE [dbo].[Bets]
+   SET [IsEvaluated] = 1
+ WHERE Id = @Id";
+
             int id = -1;
 
             using(var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using (SqlTransaction transaction = connection.BeginTransaction())
+                using(SqlTransaction transaction = connection.BeginTransaction())
                 {
                     try
                     {
                         var gambleResult = connection.Query<GambleResult>(sqlGetGambleResult, sqlGetGambleResultParam, transaction)
                             .ToList();
-
+                        int affectedRows = -1;
                         foreach(var result in gambleResult)
                         {
                             var updateBalanceSqlParam = new { AccountId = result.BettingAccountId, Win = result.Win };
 
-                            var affectedRows = connection.Execute(updateBalanceSql, updateBalanceSqlParam, transaction);
+                            affectedRows = connection.Execute(updateBalanceSql, updateBalanceSqlParam, transaction);
 
                             if(affectedRows <= 0)
                             {
@@ -333,12 +338,26 @@ where b.GambleId = @Id and b.Prediction = g.Result";
 
                         }
 
-                        connection.Execute(@"Update Gambles Set [IsArchived] = 1 where Id = @Id", sqlGetGambleResultParam,
-                            transaction);
+                        affectedRows = connection.Execute(@"Update Gambles Set [IsArchived] = 1 where Id = @Id", sqlGetGambleResultParam,
+                             transaction);
+                        
+                        if(affectedRows <= 0)
+                        {
+                            transaction.Rollback();
+                        }
 
-                        transaction.Commit();
+                        affectedRows = connection.Execute(archiveBetSql, sqlGetGambleResultParam,
+                            transaction);
+                        if(affectedRows <= 0)
+                        {
+                            transaction.Rollback();
+                        }
+                        else
+                        {
+                            transaction.Commit();
+                        }
                     }
-                    catch (Exception ex)
+                    catch(Exception ex)
                     {
                         transaction.Rollback();
                     }
