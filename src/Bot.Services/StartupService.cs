@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
@@ -6,6 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Bot.Model;
 using Bot.Modules;
+using Bot.Services.TypeReader;
 using DapperExtensions;
 using Microsoft.Extensions.Configuration;
 
@@ -39,7 +41,9 @@ namespace Bot.Services
 
             await _discord.LoginAsync(TokenType.Bot, discordToken);     // Login to discord
             await _discord.StartAsync();                                // Connect to the websocket
-            
+
+            await _discord.DownloadUsersAsync(_discord.Guilds);
+
             var moduleAssembly = Assembly.GetAssembly(typeof(HelpModule));
             await _commands.AddModulesAsync(moduleAssembly, _provider);     // Load commands and modules into the command service
             

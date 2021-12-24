@@ -93,7 +93,7 @@ namespace DotA2.Gambling.Context
       ,[BettingAccountId]
       ,[GambleId]
       ,[Amount]
-      ,[Prediction],
+      ,[Prediction]
 ,[IsEvaluated]
         ,dc.[Name] as Better
             FROM[DotA2GambleBot].[dbo].[Bets] b
@@ -197,6 +197,71 @@ Order By Balance DESC";
             return doesExist;
         }
 
+        public GambleInfo GetGambleInfo(string userName)
+        {
+            string sql = @"DECLARE @Id int;
+Select @Id = id from Gambles WHERE Name Like(@Name) and IsGameFinished = 0 order by Id DESC
+SELECT TOP 1 [Id],[Name]
+      ,[BetTime]
+      ,[Odds]
+      ,[Result]
+      ,[IsOpen]
+      ,[MatchId]
+      ,[IsGameFinished]
+      ,[IsArchived]	  from Gambles where Id = @Id;
+
+Select b.[Id]
+      ,[BettingAccountId]
+      ,[GambleId]
+      ,[Amount]
+      ,[Prediction]
+      ,[IsEvaluated],
+	  dc.Name as Better
+	  from Bets b
+	  join Accounts a on a. Id = b.BettingAccountId
+	  join DiscordUser dc on dc.Id = a.DiscordUserId where gambleId = @Id";
+
+            var paramList = new { Name = userName };
+            GambleInfo gambleInfo = new GambleInfo();
+
+            using(var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                using(var multi = connection.QueryMultiple(sql, paramList))
+                {
+                    gambleInfo.Gamble = multi.Read<Gamble>().FirstOrDefault();
+                    gambleInfo.Bets = multi.Read<Bet>().ToList();
+                }
+            }
+            
+            return gambleInfo;
+        }
+
+        public Bet GetBetInfoById(int id)
+        {
+            string sql = @"SELECT [Id]
+      ,[BettingAccountId]
+      ,[GambleId]
+      ,[Amount]
+      ,[Prediction]
+      ,[IsEvaluated]
+  FROM [DotA2GambleBot].[dbo].[Bets]
+  where Id = @Id";
+
+            var paramList = new { Id = id };
+
+            Bet bet = null;
+
+            using(var connection = new SqlConnection(_connectionString))
+            {
+                bet = connection.Query<Bet>(sql, paramList).FirstOrDefault();
+
+            }
+
+            return bet;
+        }
+
         public int InsertGamble(Gamble gamble)
         {
             string sql = @"INSERT INTO Gambles ([Name]
@@ -223,7 +288,7 @@ OUTPUT INSERTED.Id VALUES(@Name,@BetTime,@Odds,@Result,@IsOpen,@MatchId, @IsGame
 
             using(var connection = new SqlConnection(_connectionString))
             {
-                id = connection.Execute(sql, paramList);
+                id = connection.Query<int>(sql, paramList).FirstOrDefault();
             }
 
             return id;
@@ -234,7 +299,8 @@ OUTPUT INSERTED.Id VALUES(@Name,@BetTime,@Odds,@Result,@IsOpen,@MatchId, @IsGame
             string sql = @"INSERT INTO Bets([BettingAccountId]
                 ,[GambleId]
             ,[Amount]
-            ,[Prediction]) VALUES(@BettingAccountId, @GambleId,@Amount,@Prediction)";
+            ,[Prediction]) 
+OUTPUT INSERTED.Id VALUES(@BettingAccountId, @GambleId,@Amount,@Prediction)";
             var paramList = new { bet.BettingAccountId, bet.GambleId, bet.Amount, bet.Prediction };
             int id = -1;
 
@@ -245,13 +311,14 @@ OUTPUT INSERTED.Id VALUES(@Name,@BetTime,@Odds,@Result,@IsOpen,@MatchId, @IsGame
                 {
                     try
                     {
-                        id = connection.Execute(sql, paramList, transaction: transaction);
+                        id = connection.Query<int>(sql, paramList, transaction: transaction).FirstOrDefault();
 
                         UpdateAccountBalance(bet.BettingAccountId, bet.Amount, connection, transaction);
                         transaction.Commit();
                     }
                     catch(Exception ex)
                     {
+                        id = -1;
                         transaction.Rollback();
                     }
                 }
@@ -269,7 +336,7 @@ OUTPUT INSERTED.Id VALUES(@Name,@BetTime,@Odds,@Result,@IsOpen,@MatchId, @IsGame
 
             using(var connection = new SqlConnection(_connectionString))
             {
-                id = connection.Execute(sql, paramList);
+                id = connection.QueryFirst<int>(sql, paramList);
             }
 
             return id;
@@ -277,7 +344,7 @@ OUTPUT INSERTED.Id VALUES(@Name,@BetTime,@Odds,@Result,@IsOpen,@MatchId, @IsGame
 
         public int EndGamble(string userName, Prediction result, string matchId)
         {
-            string sql = "UPDATE [dbo].[Gambles] Set [Result] = @Result, [MatchId]=@MatchId, [IsGameFinished]=1 OUTPUT inserted.Id WHERE Name = @Name and IsOpen=0";
+            string sql = "UPDATE [dbo].[Gambles] Set [Result] = @Result, [MatchId]=@MatchId, [IsGameFinished]=1 OUTPUT inserted.Id WHERE Name Like(@Name) and IsOpen=0";
             var paramList = new { Name = userName, Result = result, MatchId = matchId };
             int id = -1;
 
@@ -297,16 +364,18 @@ OUTPUT INSERTED.Id VALUES(@Name,@BetTime,@Odds,@Result,@IsOpen,@MatchId, @IsGame
         public int CalculateGambleResult(int gambleId)
         {
             string sqlGetGambleResult = @"Select 
-g.Odds
-,Amount* g.Odds as Win ,
+g.Odds,
+(Amount * g.Odds) as Win,
+(Balance + (Amount * g.Odds)) as NewBalance ,
 b.BettingAccountId
 from Bets b 
 join Gambles g on g.Id = b.GambleId
+join Accounts a on b.BettingAccountId = a.Id
 where b.GambleId = @Id and b.Prediction = g.Result";
             var sqlGetGambleResultParam = new { Id = gambleId };
 
             string updateBalanceSql = @"UPDATE [dbo].[Accounts]
-   SET [Balance] = Balance + @Win
+   SET [Balance] = @NewBalance
  WHERE Id = @AccountId";
 
             string archiveBetSql = @"UPDATE [dbo].[Bets]
@@ -329,7 +398,7 @@ where b.GambleId = @Id and b.Prediction = g.Result";
                         {
                             var updateBalanceSqlParam = new { AccountId = result.BettingAccountId, Win = result.Win };
 
-                            affectedRows = connection.Execute(updateBalanceSql, updateBalanceSqlParam, transaction);
+                            affectedRows = connection.QueryFirst(updateBalanceSql, updateBalanceSqlParam, transaction);
 
                             if(affectedRows <= 0)
                             {
@@ -340,7 +409,7 @@ where b.GambleId = @Id and b.Prediction = g.Result";
 
                         affectedRows = connection.Execute(@"Update Gambles Set [IsArchived] = 1 where Id = @Id", sqlGetGambleResultParam,
                              transaction);
-                        
+
                         if(affectedRows <= 0)
                         {
                             transaction.Rollback();
@@ -373,6 +442,15 @@ SET @OldBalance = 0;
 
 Select @OldBalance = Balance from Accounts where Id = @Id
 
+INSERT INTO [dbo].[BalanceLog]
+           ([AccountId]
+           ,[Old]
+           ,[LogDate])
+     VALUES
+           (@Id
+           ,@OldBalance
+           ,getdate())
+
 UPDATE [dbo].[Accounts]
    SET [Balance] = @OldBalance - @PlacedBet
 OUTPUT INSERTED.Id
@@ -381,7 +459,7 @@ OUTPUT INSERTED.Id
             var paramList = new { Id = accountId, PlacedBet = placedBet };
             int id = -1;
 
-            id = sqlConnection.Execute(sql, paramList, transaction: transaction);
+            id = sqlConnection.QueryFirst<int>(sql, paramList, transaction: transaction);
 
             return id;
         }
@@ -397,7 +475,7 @@ VALUES(@DiscordUserId,@Balance)";
 
             using(var connection = new SqlConnection(_connectionString))
             {
-                userId = connection.Execute(sql, paramList);
+                userId = connection.QueryFirst<int>(sql, paramList);
             }
 
             return userId;

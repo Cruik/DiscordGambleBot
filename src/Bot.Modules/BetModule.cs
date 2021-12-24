@@ -34,27 +34,52 @@ namespace Bot.Modules
         [Summary("Starts a gamble. @Username is needed.")]
         public async Task StartBet(IUser user)
         {
+            string userName = user.Username;
             var caller = Context.User;
             if(IsUserRegistered(caller).GetAwaiter().GetResult())
             {
-                if(!_dataService.DoesUnfinishedGambleExist(user.Username))
+                if(!_dataService.DoesUnfinishedGambleExist(userName))
                 {
-                    var gamble = _gambler.StartGamble(user.Username);
+                    var gamble = _gambler.StartGamble(userName);
 
                     if(gamble != null)
                     {
-                        var msgText = $"> The bet is now open for player: '**{user.Username}**' \n > Odds are: **{gamble.Odds}**";
-                        await ReplyAsync(msgText);
+                        var builder = new EmbedBuilder()
+                        {
+                            Color = new Color(114, 137, 218),
+                            Description = "Time to loose some MMR"
+                        };
 
-                        await ReplyAsync($"> Place your bet !gamble win @{user.Username} 10");
-                        await ReplyAsync($"> Place your bet !gamble loss @{user.Username} 10");
+                        var msgText = $"The bet is now open for player: '**{userName}**' \n > Odds are: **{gamble.Odds}**";
 
+                        builder.AddField(x =>
+                        {
+                            x.Name = $"!!Attention!!";
+                            x.Value = msgText;
+                            x.IsInline = false;
+                        });
+
+                        builder.AddField(x =>
+                        {
+                            x.Name = $"WIN ";
+                            x.Value = $"!gamble win **@{userName}** 10";
+                            x.IsInline = false;
+                        });
+
+                        builder.AddField(x =>
+                        {
+                            x.Name = $"LOSS";
+                            x.Value = $"!gamble loss **@{userName}** 10";
+                            x.IsInline = false;
+                        });
+
+                        await ReplyAsync("", false, builder.Build());
                         Thread.Sleep(1000 * 60);
-                        msgText = $"> The bet is open for 1 more minute! \n player: '**{user.Username}**' \n > Odds are: **{gamble.Odds}**";
+                        msgText = $"> The bet is open for 1 more minute! \n player: '**{userName}**' \n > Odds are: **{gamble.Odds}**";
                         await ReplyAsync(msgText);
                         Thread.Sleep(1000 * 60);
 
-                        await CloseBet(user);
+                        //await CloseBet(user);
                     }
                     else
                     {
@@ -80,19 +105,42 @@ namespace Bot.Modules
             {
                 var id = _gambler.CloseGamble(user.Username);
 
-
                 if(id > 0)
                 {
-                    List<Bet> bets = _dataService.GetAllBetsForGamble(id);
+                    var gambleInfo = _dataService.GetGambleInfoByName(user.Username);
 
-                    var msgText = $@"> The bet is now closed for player: '{user.Username}'";
-                    var msg = await ReplyAsync(msgText);
-                    await ReplyAsync($"> 💰💰💰 {bets.Count} Bets placed 💰💰💰 \n -----------------------------------");
-
-                    foreach(var bet in bets)
+                    var builder = new EmbedBuilder()
                     {
-                        await ReplyAsync($"> '{bet.Better}' predicted -> '{bet.Prediction}' - {bet.Amount} {_tokenSymbol} ");
+                        Color = new Color(114, 137, 218),
+                        Description = "No more Bets possible"
+                    };
+
+                    var msgText = $@"The bet is now closed for player: '{gambleInfo.Gamble.Name}'";
+                    builder.AddField(x =>
+                    {
+                        x.Name = $"{msgText}";
+                        x.Value = "-";
+                        x.IsInline = false;
+                    });
+
+                    builder.AddField(x =>
+                    {
+                        x.Name = $"💰💰💰 {gambleInfo.Bets.Count} Bets placed 💰💰💰";
+                        x.Value = "-";
+                        x.IsInline = false;
+                    });
+
+                    foreach(var bet in gambleInfo.Bets)
+                    {
+                        builder.AddField(x =>
+                        {
+                            x.Name = $"'{bet.Better}' predicted -> '{bet.Prediction}' - {bet.Amount} {_tokenSymbol} ";
+                            x.Value = "-";
+                            x.IsInline = false;
+                        });
                     }
+
+                    await ReplyAsync("", false, builder.Build());
                 }
             }
         }
@@ -140,6 +188,7 @@ namespace Bot.Modules
                     else
                     {
                         await ReplyAsync("Too late to apologize! No Bets possible!");
+                        await ReplyAsync("https://tenor.com/view/im-afraid-its-too-late-scared-nervous-concerned-running-out-of-time-gif-15989937");
                     }
                 }
                 else
@@ -249,6 +298,10 @@ namespace Bot.Modules
                     await ReplyAsync("> Gamble Info");
                     await ReplyAsync($"> {gamble.Name} - Odds : '{gamble.Odds}'");
                 }
+                else
+                {
+                    await ReplyAsync($"> No open Game for {user.Username}");
+                }
 
             }
             else
@@ -258,52 +311,45 @@ namespace Bot.Modules
         }
 
         [Command("end")]
-        [Summary("End Gamble and set Result of Match.\n @Username is needed. \n result[win/loss] \n matchId(Opendota) ")]
-        public async Task EndGamble(IUser user, string result, string matchId)
+        [Summary("End Gamble and set Result of Match.\n @Username is needed. \n result[win/loss] \n")]
+        public async Task EndGamble(IUser user, string result, string matchId = "-")
         {
             var caller = Context.User;
             bool isRegistered = IsUserRegistered(caller).GetAwaiter().GetResult();
 
             if(isRegistered)
             {
-                var gamble = _dataService.GetGambleByName(user.Username);
-                if(gamble != null && gamble.Result != null)
-                {
+                var gamble = _dataService.GetGambleInfoByName(user.Username);
 
-                }
-                if(result.Equals("win", StringComparison.InvariantCultureIgnoreCase))
+                if(gamble != null)
                 {
-                    var gambleId = _dataService.EndGamble(user.Username, Prediction.Win, matchId);
-                    await ReplyAsync($"{user.Username} won his Match");
-                    await ReplyAsync("https://tenor.com/view/-gif-4519334");
-
-                    if(gambleId > 0)
+                    if(result.Equals("win", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        await GetLeaderboard();
+                        var gambleId = _dataService.EndGamble(user.Username, Prediction.Win, matchId);
+                        await ReplyAsync($"{user.Username} won his Match");
+                        await ReplyAsync("https://tenor.com/view/-gif-4519334");
+
+                        if(gambleId > 0)
+                        {
+                            await GetLeaderboard();
+                        }
+                    }
+                    else if(result.Equals("loss", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        await ReplyAsync($"{user.Username} lost his Match");
+                        await ReplyAsync($"https://tenor.com/view/supernatural-loser-yousuck-insult-diss-gif-12572295");
+                        var gambleId = _dataService.EndGamble(user.Username, Prediction.Loss, matchId);
+
+                        if(gambleId > 0)
+                        {
+                            await GetLeaderboard();
+                        }
+                    }
+                    else
+                    {
+                        await ReplyAsync("> Not a valid result. WIN or LOSS!! Nothing between!!!");
                     }
                 }
-                else if(result.Equals("loss", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    await ReplyAsync($"{user.Username} lost his Match");
-                    await ReplyAsync($"https://tenor.com/view/supernatural-loser-yousuck-insult-diss-gif-12572295");
-                    var gambleId = _dataService.EndGamble(user.Username, Prediction.Loss, matchId);
-
-                    if(gambleId > 0)
-                    {
-                        await GetLeaderboard();
-                    }
-                }
-                else
-                {
-
-                    await ReplyAsync("> Not a valid result. WIN or LOSS!! Nothing between!!!");
-                }
-
-
-            }
-            else
-            {
-                await ReplyAsync("You are already registered!");
             }
         }
 
@@ -334,53 +380,50 @@ namespace Bot.Modules
         public async Task Help()
         {
             var caller = Context.User;
-            bool isRegistered = IsUserRegistered(caller).GetAwaiter().GetResult();
             var prefix = _config.Prefix;
 
-            if(isRegistered)
+            var builder = new EmbedBuilder()
             {
-                var builder = new EmbedBuilder()
-                {
-                    Color = new Color(114, 137, 218),
-                    Description = "Help",
-                    ThumbnailUrl = @"https://i.pinimg.com/564x/8a/8b/50/8a8b50da2bc4afa933718061fe291520.jpg",
-                };
-                var betModule = _service.Modules.FirstOrDefault(x => x.Name == "gamble");
+                Color = new Color(114, 137, 218),
+                Description = "Help",
+                ThumbnailUrl = @"https://i.pinimg.com/564x/8a/8b/50/8a8b50da2bc4afa933718061fe291520.jpg",
+            };
+            var betModule = _service.Modules.FirstOrDefault(x => x.Name == "gamble");
 
-                if(betModule != null)
-                {
+            if(betModule != null)
+            {
 
-                    foreach(var cmd in betModule.Commands)
+                foreach(var cmd in betModule.Commands)
+                {
+                    string command = null;
+                    var result = await cmd.CheckPreconditionsAsync(Context);
+
+                    if(result.IsSuccess)
                     {
-                        string command = null;
-                        var result = await cmd.CheckPreconditionsAsync(Context);
+                        var parameters = cmd.Parameters;
+                        string parameterString = string.Empty;
 
-                        if(result.IsSuccess)
+                        if(parameters != null)
                         {
-                            var parameters = cmd.Parameters;
-                            string parameterString = string.Empty;
-
-                            if(parameters != null)
-                            {
-                                parameterString = string.Join(" ", parameters.Select(x => x.Name).ToList());
-                            }
-                            command += $"{prefix}{cmd.Aliases.First()} {parameterString}\n";
+                            parameterString = string.Join(" ", parameters.Select(x => x.Name).ToList());
                         }
+                        command += $"{prefix}{cmd.Aliases.First()} {parameterString}\n";
+                    }
 
-                        if(!string.IsNullOrWhiteSpace(command))
+                    if(!string.IsNullOrWhiteSpace(command))
+                    {
+                        builder.AddField(x =>
                         {
-                            builder.AddField(x =>
-                            {
-                                x.Name = $"{command}\n";
-                                x.Value = $"{cmd.Summary}";
-                                x.IsInline = false;
-                            });
+                            x.Name = $"{command}\n";
+                            x.Value = $"{cmd.Summary}";
+                            x.IsInline = false;
+                        });
 
-                        }
                     }
                 }
-                await ReplyAsync("", false, builder.Build());
             }
+            await ReplyAsync("", false, builder.Build());
+
         }
     }
 

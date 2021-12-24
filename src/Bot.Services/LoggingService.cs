@@ -34,12 +34,13 @@ namespace Bot.Services
                 // Create the log directory if it doesn't exist
                 Directory.CreateDirectory(_logDirectory);
             }
-
+            
             if(!File.Exists(_logFile))
             {
                 // Create today's log file if it doesn't exist
                 File.Create(_logFile).Dispose();
             }
+
             string logText = $"{DateTime.UtcNow.ToString("hh:mm:ss")} [{msg.Severity}] {msg.Source}: {msg.Exception?.ToString() ?? msg.Message}";
             File.AppendAllText(_logFile, logText + "\n");     // Write the log text to a file
 

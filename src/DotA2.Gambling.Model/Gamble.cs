@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace DotA2.Gambling.Model
@@ -8,7 +7,6 @@ namespace DotA2.Gambling.Model
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        //public List<Bet> Bets { get; set; }
         public DateTime BetTime { get; set; }
         public float Odds { get; set; }
         public Prediction Result { get; set; }

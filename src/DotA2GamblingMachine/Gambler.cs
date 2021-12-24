@@ -27,9 +27,16 @@ namespace DotA2GamblingMachine
                 IsOpen = true
             };
 
-            var id = _dataService.CreateGamble(gamble);
+            if (!_dataService.DoesUnfinishedGambleExist(gamble.Name))
+            {
+                gamble.Id = _dataService.CreateGamble(gamble);
+            }
+            else
+            {
+                //Todo log open gamble exists
+            }
 
-            if (id <= 0)
+            if (gamble.Id <= 0)
             {
                 gamble = null;
             }

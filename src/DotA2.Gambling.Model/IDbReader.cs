@@ -11,5 +11,7 @@ namespace DotA2.Gambling.Model
         Account GetAccount(string name);
         List<Account> GetLeaderBoard();
         bool DoesUnfinishedGambleExist(string userUsername);
+        GambleInfo GetGambleInfo(string userName);
+        Bet GetBetInfoById(int id);
     }
 }

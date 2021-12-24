@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Bot.Model;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
@@ -31,14 +33,23 @@ namespace Bot.Services
 
         private async Task OnMessageReceivedAsync(SocketMessage s)
         {
+            
+
             var msg = s as SocketUserMessage;     // Ensure the message is from a user/bot
 
             bool isMsgEmtpy = msg == null;
-            bool isSenderBot = msg.Author.Id == _discord.CurrentUser.Id;
 
-            if(isMsgEmtpy || isSenderBot)
+            if(isMsgEmtpy)
             {
                 return;     // Ignore self when checking commands
+            }
+            else
+            {
+                bool isSenderBot = msg.Author.Id == _discord.CurrentUser.Id;
+                if ((isSenderBot) && msg.Content != ("!gamble help"))
+                {
+                    return;
+                }
             }
 
             var context = new SocketCommandContext(_discord, msg);     // Create the command context
@@ -48,14 +59,16 @@ namespace Bot.Services
             bool isMsgValid = msg.Content.Length > 1 && regex.IsMatch(msg.Content);
             try
             {
+               
                 if(isMsgValid && (msg.HasStringPrefix(_botConfig.Prefix, ref argPos) || msg.HasMentionPrefix(_discord.CurrentUser, ref argPos)))
                 {
                     var result = await _commands.ExecuteAsync(context, argPos, _provider);     // Execute the command
-
+                    var caller = context.User;
                     if(!result.IsSuccess)
                     {
                         // If not successful, reply with the error.
-                        await context.Channel.SendMessageAsync(result.ToString());
+                        await context.Channel.SendMessageAsync($"Error. Did you use the command correctly?");
+                        await context.Channel.SendMessageAsync($"!gamble help");
                     }
                 }
                 else
@@ -63,9 +76,13 @@ namespace Bot.Services
                     //todo Handle all other messages
                 }
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 await context.Channel.SendMessageAsync($"Error occured!");
+                
+                ulong botCreatorId = 324652745099313154;
+
+                await context.Client.GetUser(botCreatorId).SendMessageAsync(ex.Message);
             }
         }
     }

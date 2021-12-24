@@ -20,12 +20,12 @@ namespace Bot.Services
         public int AddUser(DiscordUser user)
         {
             var userId = _dataWriter.AddUser(user);
-            
-            if (userId > 0)
+
+            if(userId > 0)
             {
                 var account = new Account()
                 {
-                    Balance = 200,
+                    Balance = 500,
                     DiscordUserId = userId,
 
                 };
@@ -42,7 +42,9 @@ namespace Bot.Services
 
         public int CreateGamble(Gamble gamble)
         {
-            var id = _dataWriter.InsertGamble(gamble);
+            int id = -1;
+            
+            id = _dataWriter.InsertGamble(gamble);
 
             return id;
         }
@@ -53,10 +55,15 @@ namespace Bot.Services
 
             return id;
         }
-        
+
         public Gamble GetGambleByName(string userName)
         {
             return _dataReader.GetGamble(userName);
+        }
+
+        public GambleInfo GetGambleInfoByName(string userName)
+        {
+            return _dataReader.GetGambleInfo(userName);
         }
 
         public int EndGamble(string userName, Prediction prediction, string matchId)
@@ -104,6 +111,11 @@ namespace Bot.Services
         public bool DoesUnfinishedGambleExist(string userUsername)
         {
             return _dataReader.DoesUnfinishedGambleExist(userUsername);
+        }
+
+        public Bet GetBetInfoById(int id)
+        {
+            return _dataReader.GetBetInfoById(id);
         }
     }
 }
