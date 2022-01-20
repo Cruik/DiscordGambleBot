@@ -396,9 +396,10 @@ where b.GambleId = @Id and b.Prediction = g.Result";
                         int affectedRows = -1;
                         foreach(var result in gambleResult)
                         {
-                            var updateBalanceSqlParam = new { AccountId = result.BettingAccountId, Win = result.Win };
+                             
+                            var updateBalanceSqlParam = new { AccountId = result.BettingAccountId,  NewBalance = result.NewBalance, Win = result.Win };
 
-                            affectedRows = connection.QueryFirst(updateBalanceSql, updateBalanceSqlParam, transaction);
+                            affectedRows = connection.Execute(updateBalanceSql, updateBalanceSqlParam, transaction);
 
                             if(affectedRows <= 0)
                             {
