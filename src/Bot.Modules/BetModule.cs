@@ -193,7 +193,7 @@ namespace Bot.Modules
                 }
                 else
                 {
-                    await ReplyAsync($"{user.Username} you have not enough to place this bet!");
+                    await ReplyAsync($"{caller.Username} you have not enough to place this bet!");
                     await ReplyAsync("https://tenor.com/view/patrick-poor-ugly-thing-spongbob-gif-13658543");
                 }
             }
