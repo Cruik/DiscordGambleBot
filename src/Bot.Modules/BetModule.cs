@@ -74,7 +74,7 @@ namespace Bot.Modules
                         });
 
                         await ReplyAsync("", false, builder.Build());
-                        Thread.Sleep(1000 * 60);
+                        Thread.Sleep(1000 * 60 * 2);
                         msgText = $"> The bet is open for 1 more minute! \n player: '**{userName}**' \n > Odds are: **{gamble.Odds}**";
                         await ReplyAsync(msgText);
                         Thread.Sleep(1000 * 60);
