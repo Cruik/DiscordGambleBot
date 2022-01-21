@@ -65,17 +65,12 @@ namespace Bot.Services
                     if (!result.IsSuccess)
                     {
                         // If not successful, reply with the error.
-                        await context.Channel.SendMessageAsync($"Error. Did you use the command correctly?");
-                        await context.Channel.SendMessageAsync($"!gamble help");
+                        await context.Channel.SendMessageAsync($"Error. Did you use the command correctly? type !gamble help");
                     }
                 }
                 else
                 {
-                    var regexWeird = new Regex(@"([w|W][e|E][i|I][r|R][d|D])|([k|K][o|O][mM][iI][sS][cC][hH])");
-                    if (regexWeird.IsMatch(msg.Content))
-                    {
-                        await context.Channel.SendMessageAsync($"Außer dir ist hier gar nichts komisch oder weird!");
-                    }
+                    //todo handle all other messages
                 }
             }
             catch (Exception ex)
