@@ -79,7 +79,7 @@ namespace Bot.Modules
                         await ReplyAsync(msgText);
                         Thread.Sleep(1000 * 60);
 
-                        //await CloseBet(user);
+                        await CloseBet(user);
                     }
                     else
                     {
