@@ -9,6 +9,7 @@
 
         int CloseGamble(string name);
         int EndGamble(string userName, Prediction prediction, string matchId);
+        int EndGamble(int gambleId, Prediction prediction, string matchId);
         int CalculateGambleResult(int gambleId);
     }
 }

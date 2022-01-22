@@ -12,6 +12,8 @@ namespace DotA2.Gambling.Model
         Gamble GetGambleByName(string userName);
         GambleInfo GetGambleInfoByName(string userName);
         int EndGamble(string userName, Prediction prediction, string matchId);
+        int EndGamble(int gambleId, Prediction prediction, string matchId);
+        int CalculateGambleResult(int gambleId);
         int CloseGamble(string userName);
         DiscordUser GetUserByName(string userUsername);
         Account GetAccount(DiscordUser discordUser);

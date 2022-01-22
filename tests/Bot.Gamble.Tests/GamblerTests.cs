@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using DotA2.Gambling.Model;
@@ -75,8 +76,9 @@ namespace Bot.Gamble.Tests
         {
             var dataService = _fixture.DataService;
 
+            var gambleId = 2;
             
-            _fixture.DataService.GetGambleInfoByName("Cruik");
+            _fixture.DataService.EndGamble("Bravious",Prediction.Loss,string.Empty);
 
         }
 

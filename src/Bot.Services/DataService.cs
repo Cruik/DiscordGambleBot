@@ -71,6 +71,16 @@ namespace Bot.Services
             return _dataWriter.EndGamble(userName, prediction, matchId);
         }
 
+        public int EndGamble(int gambleId, Prediction prediction, string matchId)
+        {
+            return _dataWriter.EndGamble(gambleId, prediction, matchId);
+        }
+
+        public int CalculateGambleResult(int gambleId)
+        {
+            return _dataWriter.CalculateGambleResult(gambleId);
+        }
+
         public int CloseGamble(string name)
         {
             return _dataWriter.CloseGamble(name);
