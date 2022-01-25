@@ -312,7 +312,7 @@ namespace Bot.Modules
 
         [Command("end")]
         [Summary("End Gamble and set Result of Match.\n @Username is needed. \n result[win/loss] \n")]
-        public async Task EndGamble(IUser user, string result, string matchId = "-")
+        public async Task EndGamble(IUser user, string result)
         {
             var caller = Context.User;
             bool isRegistered = IsUserRegistered(caller).GetAwaiter().GetResult();
@@ -325,7 +325,7 @@ namespace Bot.Modules
                 {
                     if(result.Equals("win", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        var gambleId = _dataService.EndGamble(user.Username, Prediction.Win, matchId);
+                        var gambleId = _dataService.EndGamble(gamble.Gamble.Id, Prediction.Win, string.Empty);
                         await ReplyAsync($"{user.Username} won his Match");
                         await ReplyAsync("https://tenor.com/view/-gif-4519334");
 
@@ -338,7 +338,7 @@ namespace Bot.Modules
                     {
                         await ReplyAsync($"{user.Username} lost his Match");
                         await ReplyAsync($"https://tenor.com/view/supernatural-loser-yousuck-insult-diss-gif-12572295");
-                        var gambleId = _dataService.EndGamble(user.Username, Prediction.Loss, matchId);
+                        var gambleId = _dataService.EndGamble(gamble.Gamble.Id, Prediction.Loss, string.Empty);
 
                         if(gambleId > 0)
                         {

@@ -75,10 +75,20 @@ namespace Bot.Gamble.Tests
         public void GetGambleInfo()
         {
             var dataService = _fixture.DataService;
+            var allGambles = dataService.GetAllGambles();
 
-            var gambleId = 2;
-            
-            _fixture.DataService.EndGamble("Bravious",Prediction.Loss,string.Empty);
+            dataService.ResetEvaluation();
+            foreach (var allGamble in allGambles)
+            {
+                var id = allGamble.Id;
+                var bets = dataService.GetAllBetsForGamble(id);
+                foreach (var bet in bets)
+                {
+                    dataService.SubtractBetFromBalance(bet.BettingAccountId,bet.Amount);
+                }
+                var result = allGamble.Result;
+                dataService.EndGamble(id, result, string.Empty);
+            }
 
         }
 

@@ -22,5 +22,8 @@ namespace DotA2.Gambling.Model
         List<Bet> GetAllBetsForGamble(int id);
         bool DoesUnfinishedGambleExist(string userUsername);
         Bet GetBetInfoById(int id);
+        List<Gamble> GetAllGambles();
+        void ResetEvaluation();
+        void SubtractBetFromBalance(int accountId, int bet);
     }
 }

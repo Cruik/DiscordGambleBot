@@ -13,5 +13,6 @@ namespace DotA2.Gambling.Model
         bool DoesUnfinishedGambleExist(string userUsername);
         GambleInfo GetGambleInfo(string userName);
         Bet GetBetInfoById(int id);
+        List<Gamble> GetAllGambles();
     }
 }

@@ -127,5 +127,20 @@ namespace Bot.Services
         {
             return _dataReader.GetBetInfoById(id);
         }
+
+        public List<Gamble> GetAllGambles()
+        {
+            return _dataReader.GetAllGambles();
+        }
+
+        public void ResetEvaluation()
+        {
+            _dataWriter.ResetEvaluation();
+        }
+
+        public void SubtractBetFromBalance(int accountId, int bet)
+        {
+            _dataWriter.SubtractBetFromBalance(accountId, bet);
+        }
     }
 }

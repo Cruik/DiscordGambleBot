@@ -11,5 +11,7 @@
         int EndGamble(string userName, Prediction prediction, string matchId);
         int EndGamble(int gambleId, Prediction prediction, string matchId);
         int CalculateGambleResult(int gambleId);
+        void ResetEvaluation();
+        void SubtractBetFromBalance(int accountId, int bet);
     }
 }
