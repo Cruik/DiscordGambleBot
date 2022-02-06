@@ -1,4 +1,6 @@
-﻿namespace DotA2.Gambling.Model
+﻿using System;
+
+namespace DotA2.Gambling.Model
 {
     public interface IDbWriter
     {
@@ -13,5 +15,6 @@
         int CalculateGambleResult(int gambleId);
         void ResetEvaluation();
         void SubtractBetFromBalance(int accountId, int bet);
+        void EndSeason(DateTime date);
     }
 }

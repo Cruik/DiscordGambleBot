@@ -266,9 +266,16 @@ namespace Bot.Modules
 
                 foreach(var account in accounts)
                 {
+                    var name = $"{cnt}. {account.DiscordUser.Name}";
+                    
+                    if (!string.IsNullOrEmpty(account.DiscordUser.Emoji))
+                    {
+                        name = $"{cnt}. {account.DiscordUser.Name} {account.DiscordUser.Emoji}";
+                    }
+                    
                     builder.AddField(x =>
                     {
-                        x.Name = $"{cnt}. {account.DiscordUser.Name}";
+                        x.Name = name;
                         x.Value = $"{account.Balance} {_tokenSymbol}";
                         x.IsInline = false;
                     });

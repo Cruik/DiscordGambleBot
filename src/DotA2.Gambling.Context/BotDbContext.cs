@@ -542,6 +542,27 @@ where b.GambleId = @Id";
 
         }
 
+        public void EndSeason(DateTime date)
+        {
+            var seasonId = 0;
+            var copyBalanceForLogSql = @"INSERT INTO [dbo].[SeasonLog]
+           ([AccountId]
+           ,[SeasonId]
+           ,[Balance])
+     
+	 SELECT TOP (1000) [Id]
+      ,@SeasonId
+      ,[Balance]
+  FROM [dbo].[Accounts];";
+
+            var refillAccountBalanceSql = @"
+  Update Accounts Set Balance = 500";
+             
+            var paramList = new { SeasonId = seasonId };
+
+            
+        }
+
         public int UpdateAccountBalance(int accountId, int placedBet, SqlConnection sqlConnection,
             SqlTransaction transaction)
         {
