@@ -97,7 +97,7 @@ namespace DotA2GambleBot
             services.AddScoped<IDbWriter, BotDbContext>();
             
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
+                .MinimumLevel.Warning()
                 .WriteTo
                 .MSSqlServer(
                     connectionString: botConfiguration.DefaultConnection,

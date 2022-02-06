@@ -10,6 +10,7 @@ using Bot.Modules;
 using Bot.Services.TypeReader;
 using DapperExtensions;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 
 namespace Bot.Services
 {
@@ -35,6 +36,7 @@ namespace Bot.Services
 
         public async Task StartAsync()
         {
+            Log.Logger.Warning("Bot starting....");
             string discordToken = _botConfig.Token;     // Get the discord token from the config file
             if(string.IsNullOrWhiteSpace(discordToken))
                 throw new Exception("Please enter your bot's token into the `_configuration.json` file found in the applications root directory.");
@@ -46,6 +48,8 @@ namespace Bot.Services
 
             var moduleAssembly = Assembly.GetAssembly(typeof(HelpModule));
             await _commands.AddModulesAsync(moduleAssembly, _provider);     // Load commands and modules into the command service
+            
+            Log.Logger.Warning("Bot started");
             
         }
     }
