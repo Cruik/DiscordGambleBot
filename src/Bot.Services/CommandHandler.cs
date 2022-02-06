@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Bot.Model;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Serilog;
+using Serilog.Sinks.MSSqlServer;
 
 namespace Bot.Services
 {
@@ -65,21 +68,18 @@ namespace Bot.Services
                     if (!result.IsSuccess)
                     {
                         // If not successful, reply with the error.
-                        await context.Channel.SendMessageAsync($"Error. Did you use the command correctly? type !gamble help");
+                        await context.Channel.SendMessageAsync(
+                            $"Error. Did you use the command correctly? type !gamble help");
                     }
                 }
                 else
                 {
-                    //todo handle all other messages
+                    //todo handle all other messages?
                 }
             }
             catch (Exception ex)
             {
-                await context.Channel.SendMessageAsync($"Error occured!");
-
-                ulong botCreatorId = 324652745099313154;
-
-                await context.Client.GetUser(botCreatorId).SendMessageAsync(ex.Message);
+                Log.Logger.Error(ex, ex.Message);
             }
         }
     }

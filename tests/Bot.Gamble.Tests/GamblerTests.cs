@@ -68,7 +68,7 @@ namespace Bot.Gamble.Tests
                 RichKid = false
             };
 
-            _fixture.Gambler.EndGamble(user.Name, Prediction.Win,"-");
+            _fixture.DataService.EndGamble(7, Prediction.Win,string.Empty);
 
         }
        [Fact]

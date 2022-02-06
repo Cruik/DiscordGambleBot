@@ -11,6 +11,8 @@ using DotA2.Gambling.Model;
 using DotA2GamblingMachine;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Sinks.MSSqlServer;
 
 namespace DotA2GambleBot
 {
@@ -25,7 +27,6 @@ namespace DotA2GambleBot
             var isDevelopment = string.IsNullOrEmpty(environment) ||
                                 environment.ToLower() == "development";
 
-
             var builder = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
                 .AddJsonFile($"appsettings.docker.json", optional: true)
@@ -36,7 +37,8 @@ namespace DotA2GambleBot
             {
                 builder.AddUserSecrets<Program>(true);
             }
-
+            
+            
             Configuration = builder.Build();
         }
 
@@ -93,6 +95,15 @@ namespace DotA2GambleBot
             services.AddScoped<IGambler, Gambler>();
             services.AddScoped<IDbReader, BotDbContext>();
             services.AddScoped<IDbWriter, BotDbContext>();
+            
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo
+                .MSSqlServer(
+                    connectionString: botConfiguration.DefaultConnection,
+                    sinkOptions: new MSSqlServerSinkOptions { TableName = "LogEvents",AutoCreateSqlTable = true})
+                .WriteTo.Console()
+                .CreateLogger();
         }
 
     }
